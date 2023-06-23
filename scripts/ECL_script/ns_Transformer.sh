@@ -39,7 +39,7 @@ python -u run.py \
   --enc_in 321 \
   --dec_in 321 \
   --c_out 321 \
-  --gpu 1 \
+  --gpu 0 \
   --des 'Exp_h256_l2' \
   --p_hidden_dims 256 256 \
   --p_hidden_layers 2 \
@@ -63,7 +63,7 @@ python -u run.py \
   --enc_in 321 \
   --dec_in 321 \
   --c_out 321 \
-  --gpu 2 \
+  --gpu 0 \
   --des 'Exp_h128_l2' \
   --p_hidden_dims 128 128 \
   --p_hidden_layers 2 \
@@ -86,7 +86,7 @@ python -u run.py \
   --enc_in 321 \
   --dec_in 321 \
   --c_out 321 \
-  --gpu 3 \
+  --gpu 0 \
   --des 'Exp_h128_l2' \
   --p_hidden_dims 128 128 \
   --p_hidden_layers 2 \

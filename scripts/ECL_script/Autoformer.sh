@@ -12,7 +12,7 @@ python -u run.py \
   --e_layers 2 \
   --d_layers 1 \
   --factor 3 \
-  --gpu 4 \
+  --gpu 0 \
   --enc_in 321 \
   --dec_in 321 \
   --c_out 321 \
@@ -33,7 +33,7 @@ python -u run.py \
   --e_layers 2 \
   --d_layers 1 \
   --factor 3 \
-  --gpu 5 \
+  --gpu 0 \
   --enc_in 321 \
   --dec_in 321 \
   --c_out 321 \
@@ -54,7 +54,7 @@ python -u run.py \
   --e_layers 2 \
   --d_layers 1 \
   --factor 3 \
-  --gpu 6 \
+  --gpu 0 \
   --enc_in 321 \
   --dec_in 321 \
   --c_out 321 \
@@ -75,7 +75,7 @@ python -u run.py \
   --e_layers 2 \
   --d_layers 1 \
   --factor 3 \
-  --gpu 7 \
+  --gpu 0 \
   --enc_in 321 \
   --dec_in 321 \
   --c_out 321 \

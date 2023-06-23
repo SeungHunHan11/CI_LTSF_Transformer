@@ -315,7 +315,7 @@ class Exp_Main(Exp_Basic):
 
         mae, mse, rmse, mape, mspe = metric(preds, trues)
         print('mse:{}, mae:{}'.format(mse, mae))
-        f = open(os.path.join(folder_path,"result.txt"), 'a')
+        f = open("result.txt", 'a')
         f.write(setting + "  \n")
         f.write('mse:{}, mae:{}'.format(mse, mae))
         f.write('\n')
