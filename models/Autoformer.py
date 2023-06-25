@@ -17,6 +17,7 @@ class Model(nn.Module):
         self.label_len = configs.label_len
         self.pred_len = configs.pred_len
         self.output_attention = configs.output_attention
+        self.subtract_last = config.subtract_last
 
         # Decomp
         kernel_size = configs.moving_avg
@@ -74,6 +75,11 @@ class Model(nn.Module):
 
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec,
                 enc_self_mask=None, dec_self_mask=None, dec_enc_mask=None):
+        
+        if self.subtract_last:
+            seq_last = x_enc[:, -1:, :].detach()
+            x_enc = x_enc - seq_last
+
         # decomp init
         mean = torch.mean(x_enc, dim=1).unsqueeze(1).repeat(1, self.pred_len, 1)
         zeros = torch.zeros([x_dec.shape[0], self.pred_len, x_dec.shape[2]], device=x_enc.device)
@@ -83,13 +89,17 @@ class Model(nn.Module):
         seasonal_init = torch.cat([seasonal_init[:, -self.label_len:, :], zeros], dim=1)
         # enc
         enc_out = self.enc_embedding(x_enc, x_mark_enc)
-        enc_out, attns = self.encoder(enc_out, attn_mask=enc_self_mask)
+        enc_out, attns = self.encoder(enc_out, attn_mask=enc_self_mask)     
+
         # dec
         dec_out = self.dec_embedding(seasonal_init, x_mark_dec)
         seasonal_part, trend_part = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask,
                                                  trend=trend_init)
         # final
         dec_out = trend_part + seasonal_part
+    
+        if self.subtract_last: 
+            dec_out = dec_out + seq_last
 
         if self.output_attention:
             return dec_out[:, -self.pred_len:, :], attns

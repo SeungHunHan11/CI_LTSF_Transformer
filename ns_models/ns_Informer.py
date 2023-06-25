@@ -43,6 +43,7 @@ class Model(nn.Module):
         self.pred_len = configs.pred_len
         self.label_len = configs.label_len
         self.output_attention = configs.output_attention
+        self.subtract_last = config.subtract_last
 
         # Embedding
         self.enc_embedding = DataEmbedding(configs.enc_in, configs.d_model, configs.embed, configs.freq,
@@ -100,6 +101,10 @@ class Model(nn.Module):
 
         x_raw = x_enc.clone().detach()
 
+        if self.subtract_last:
+            seq_last = x_raw[:, -1:, :].detach()
+            x_enc = x_enc - seq_last
+
         # Normalization
         mean_enc = x_enc.mean(1, keepdim=True).detach() # B x 1 x E
         x_enc = x_enc - mean_enc
@@ -119,6 +124,9 @@ class Model(nn.Module):
 
         # De-normalization
         dec_out = dec_out * std_enc + mean_enc
+
+        if self.subtract_last:
+            dec_out = dec_out + seq_last
 
         if self.output_attention:
             return dec_out[:, -self.pred_len:, :], attns

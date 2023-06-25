@@ -15,9 +15,10 @@ python -u run.py \
   --enc_in 8 \
   --dec_in 8 \
   --c_out 8 \
-  --gpu 4 \
+  --gpu 0 \
   --des 'Exp' \
-  --itr 1 &
+  --subtract_last \
+  --itr 1
 
 python -u run.py \
   --is_training 1 \
@@ -36,8 +37,9 @@ python -u run.py \
   --enc_in 8 \
   --dec_in 8 \
   --c_out 8 \
-  --gpu 5 \
+  --gpu 0 \
   --des 'Exp' \
+  --subtract_last \
   --itr 1 &
 
 python -u run.py \
@@ -57,8 +59,9 @@ python -u run.py \
   --enc_in 8 \
   --dec_in 8 \
   --c_out 8 \
-  --gpu 6 \
+  --gpu 0 \
   --des 'Exp' \
+  --subtract_last \
   --itr 1 &
 
 python -u run.py \
@@ -78,6 +81,7 @@ python -u run.py \
   --enc_in 8 \
   --dec_in 8 \
   --c_out 8 \
-  --gpu 7 \
+  --gpu 0 \
   --des 'Exp' \
+  --subtract_last \
   --itr 1 &

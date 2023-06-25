@@ -45,6 +45,7 @@ class Model(nn.Module):
         self.label_len = configs.label_len
         self.pred_len = configs.pred_len
         self.output_attention = configs.output_attention
+        self.subtract_last = config.subtract_last
 
         # Decomp
         kernel_size = configs.moving_avg
@@ -109,6 +110,10 @@ class Model(nn.Module):
 
         x_raw = x_enc.clone().detach()
 
+        if self.subtract_last:
+            seq_last = x_raw[:, -1:, :].detach()
+            x_enc = x_enc - seq_last
+
         # Normalization
         mean_enc = x_enc.mean(1, keepdim=True).detach() # B x 1 x E
         x_enc = x_enc - mean_enc
@@ -131,6 +136,7 @@ class Model(nn.Module):
         # enc
         enc_out = self.enc_embedding(x_enc, x_mark_enc)
         enc_out, attns = self.encoder(enc_out, attn_mask=enc_self_mask, tau=tau, delta=delta)
+        
         # dec
         dec_out = self.dec_embedding(seasonal_init, x_mark_dec)
         seasonal_part, trend_part = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask,
@@ -140,6 +146,9 @@ class Model(nn.Module):
 
         # De-normalization
         dec_out = dec_out * std_enc + mean_enc
+
+        if self.subtract_last:
+            dec_out = dec_out + seq_last
 
         if self.output_attention:
             return dec_out[:, -self.pred_len:, :], attns

@@ -29,7 +29,7 @@ do
                 --des 'Exp_h256_l2' \
                 --p_hidden_dims 256 256 \
                 --p_hidden_layers 2 \
-                --itr 1 &
+                --itr 1
         done
     done
 done

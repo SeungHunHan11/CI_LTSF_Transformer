@@ -1,10 +1,10 @@
 python -u run.py \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
-  --data_path ETTh2.csv \
-  --model_id ETTh2_96_96 \
-  --model Informer \
-  --data ETTh2 \
+  --data_path ETTm1.csv \
+  --model_id ETTm1_96_96 \
+  --model Autoformer \
+  --data ETTm1 \
   --features M \
   --seq_len 96 \
   --label_len 48 \
@@ -21,10 +21,10 @@ python -u run.py \
 python -u run.py \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
-  --data_path ETTh2.csv \
-  --model_id ETTh2_96_192 \
-  --model Informer \
-  --data ETTh2 \
+  --data_path ETTm1.csv \
+  --model_id ETTm1_96_192 \
+  --model Autoformer \
+  --data ETTm1 \
   --features M \
   --seq_len 96 \
   --label_len 48 \
@@ -41,10 +41,10 @@ python -u run.py \
 python -u run.py \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
-  --data_path ETTh2.csv \
-  --model_id ETTh2_96_336 \
-  --model Informer \
-  --data ETTh2 \
+  --data_path ETTm1.csv \
+  --model_id ETTm1_96_336 \
+  --model Autoformer \
+  --data ETTm1 \
   --features M \
   --seq_len 96 \
   --label_len 48 \
@@ -61,10 +61,10 @@ python -u run.py \
 python -u run.py \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
-  --data_path ETTh2.csv \
-  --model_id ETTh2_96_720 \
-  --model Informer \
-  --data ETTh2 \
+  --data_path ETTm1.csv \
+  --model_id ETTm1_96_720 \
+  --model Autoformer \
+  --data ETTm1 \
   --features M \
   --seq_len 96 \
   --label_len 48 \

@@ -3,7 +3,7 @@ python -u run.py \
   --root_path ./dataset/ETT-small/ \
   --data_path ETTh2.csv \
   --model_id ETTh2_96_96 \
-  --model Autoformer \
+  --model Transformer \
   --data ETTh2 \
   --features M \
   --seq_len 96 \
@@ -23,7 +23,7 @@ python -u run.py \
   --root_path ./dataset/ETT-small/ \
   --data_path ETTh2.csv \
   --model_id ETTh2_96_192 \
-  --model Autoformer \
+  --model Transformer \
   --data ETTh2 \
   --features M \
   --seq_len 96 \
@@ -34,7 +34,7 @@ python -u run.py \
   --enc_in 7 \
   --dec_in 7 \
   --c_out 7 \
-  --gpu 5 \
+  --gpu 0 \
   --des 'Exp' \
   --itr 1  &
 
@@ -43,7 +43,7 @@ python -u run.py \
   --root_path ./dataset/ETT-small/ \
   --data_path ETTh2.csv \
   --model_id ETTh2_96_336 \
-  --model Autoformer \
+  --model Transformer \
   --data ETTh2 \
   --features M \
   --seq_len 96 \
@@ -54,7 +54,7 @@ python -u run.py \
   --enc_in 7 \
   --dec_in 7 \
   --c_out 7 \
-  --gpu 6 \
+  --gpu 0 \
   --des 'Exp' \
   --itr 1 &
 
@@ -63,7 +63,7 @@ python -u run.py \
   --root_path ./dataset/ETT-small/ \
   --data_path ETTh2.csv \
   --model_id ETTh2_96_720 \
-  --model Autoformer \
+  --model Transformer \
   --data ETTh2 \
   --features M \
   --seq_len 96 \
@@ -74,6 +74,6 @@ python -u run.py \
   --enc_in 7 \
   --dec_in 7 \
   --c_out 7 \
-  --gpu 7 \
+  --gpu 0 \
   --des 'Exp' \
   --itr 1 &

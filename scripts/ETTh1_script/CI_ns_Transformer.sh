@@ -1,10 +1,10 @@
 python -u run.py \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
-  --data_path ETTh2.csv \
-  --model_id ETTh2_96_96 \
+  --data_path ETTh1.csv \
+  --model_id ETTh1_96_96 \
   --model CI_NS_Transformer \
-  --data ETTh2 \
+  --data ETTh1 \
   --features M \
   --seq_len 96 \
   --label_len 48 \
@@ -23,10 +23,10 @@ python -u run.py \
 python -u run.py \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
-  --data_path ETTh2.csv \
-  --model_id ETTh2_96_192 \
-  --model ns_Transformer \
-  --data ETTh2 \
+  --data_path ETTh1.csv \
+  --model_id ETTh1_96_192 \
+  --model CI_NS_Transformer \
+  --data ETTh1 \
   --features M \
   --seq_len 96 \
   --label_len 48 \
@@ -36,19 +36,19 @@ python -u run.py \
   --enc_in 7 \
   --dec_in 7 \
   --c_out 7 \
-  --gpu 1 \
+  --gpu 0 \
   --des 'Exp_h64_l2' \
-  --p_hidden_dims 64 64 \
+  --p_hidden_dims 256 256 \
   --p_hidden_layers 2 \
   --itr 1  &
 
 python -u run.py \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
-  --data_path ETTh2.csv \
-  --model_id ETTh2_96_336 \
-  --model ns_Transformer \
-  --data ETTh2 \
+  --data_path ETTh1.csv \
+  --model_id ETTh1_96_336 \
+  --model CI_NS_Transformer \
+  --data ETTh1 \
   --features M \
   --seq_len 96 \
   --label_len 48 \
@@ -58,7 +58,7 @@ python -u run.py \
   --enc_in 7 \
   --dec_in 7 \
   --c_out 7 \
-  --gpu 2 \
+  --gpu 0 \
   --des 'Exp_h256_l2' \
   --p_hidden_dims 256 256 \
   --p_hidden_layers 2 \
@@ -67,10 +67,10 @@ python -u run.py \
 python -u run.py \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
-  --data_path ETTh2.csv \
-  --model_id ETTh2_96_720 \
-  --model ns_Transformer \
-  --data ETTh2 \
+  --data_path ETTh1.csv \
+  --model_id ETTh1_96_720 \
+  --model CI_NS_Transformer \
+  --data ETTh1 \
   --features M \
   --seq_len 96 \
   --label_len 48 \
@@ -80,7 +80,7 @@ python -u run.py \
   --enc_in 7 \
   --dec_in 7 \
   --c_out 7 \
-  --gpu 3 \
+  --gpu 0 \
   --des 'Exp_h256_l2' \
   --p_hidden_dims 256 256 \
   --p_hidden_layers 2 \

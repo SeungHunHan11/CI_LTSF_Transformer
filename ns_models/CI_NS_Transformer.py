@@ -47,6 +47,7 @@ class Model(nn.Module):
         self.pred_len = configs.pred_len
         self.d_model = configs.d_model
         self.nvars = configs.enc_in
+        self.subtract_last = config.subtract_last
 
         self.embedding = CI_embedding(self.d_model)
         
@@ -96,7 +97,11 @@ class Model(nn.Module):
         bsz, seq_len, nvars = x.shape
 
         x_raw = x.clone().detach()
-
+        
+        if self.subtract_last:
+            seq_last = x_raw[:, -1:, :].detach()
+            x = x - seq_last
+        
         x_mean = x.mean(1, keepdim=True).detach() # bsz x 1 x nvars
         x = x - x_mean # bsz x seq_len x nvars
 
@@ -119,6 +124,9 @@ class Model(nn.Module):
         output = output.permute(0,2,1) # (bsz, pred_len, nvars)
 
         output = output * x_std + x_mean # bsz x pred_len x nvars
+
+        if self.subtract_last: 
+            output = output + seq_last
 
         return output
 
