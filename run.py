@@ -99,6 +99,8 @@ print('Args in experiment:')
 print(args)
 Exp = Exp_Main
 
+loss_func = 'MSE' if args.use_l2 else 'MAE'
+
 if args.is_training:
     for ii in range(args.itr):
         # setting record of experiments
@@ -119,7 +121,7 @@ if args.is_training:
             args.embed,
             args.distil,
             args.des, ii,
-            args.use_l2
+            loss_func
             )
 
         exp = Exp(args)  # set experiments
@@ -152,7 +154,7 @@ else:
                                                                                                   args.embed,
                                                                                                   args.distil,
                                                                                                   args.des, ii,
-                                                                                                  args.use_l2
+                                                                                                  loss_func
                                                                                                   )
 
     exp = Exp(args)  # set experiments

@@ -13,7 +13,7 @@ class Model(nn.Module):
         super(Model, self).__init__()
         self.pred_len = configs.pred_len
         self.output_attention = configs.output_attention
-        self.subtract_last = config.subtract_last
+        self.subtract_last = configs.subtract_last
 
         # Embedding
         self.enc_embedding = DataEmbedding(configs.enc_in, configs.d_model, configs.embed, configs.freq,

@@ -55,6 +55,7 @@ class Exp_Main(Exp_Basic):
             criterion = nn.MSELoss()
         else:
             criterion = nn.L1Loss()
+            
         return criterion
 
     def vali(self, vali_data, vali_loader, criterion):

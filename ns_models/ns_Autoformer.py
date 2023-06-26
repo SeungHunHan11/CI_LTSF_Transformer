@@ -45,7 +45,7 @@ class Model(nn.Module):
         self.label_len = configs.label_len
         self.pred_len = configs.pred_len
         self.output_attention = configs.output_attention
-        self.subtract_last = config.subtract_last
+        self.subtract_last = configs.subtract_last
 
         # Decomp
         kernel_size = configs.moving_avg

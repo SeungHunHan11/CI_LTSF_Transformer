@@ -45,7 +45,7 @@ class Model(nn.Module):
         self.seq_len = configs.seq_len
         self.label_len = configs.label_len
         self.output_attention = configs.output_attention
-        self.subtract_last = config.subtract_last
+        self.subtract_last = configs.subtract_last
 
         # Embedding
         self.enc_embedding = DataEmbedding(configs.enc_in, configs.d_model, configs.embed, configs.freq,
@@ -100,7 +100,6 @@ class Model(nn.Module):
             seq_last = x_raw[:, -1:, :].detach()
             x_enc = x_enc - seq_last
 
-
         # Normalization
         mean_enc = x_enc.mean(1, keepdim=True).detach() # B x 1 x E
         x_enc = x_enc - mean_enc
@@ -115,15 +114,7 @@ class Model(nn.Module):
         enc_out = self.enc_embedding(x_enc, x_mark_enc)
         enc_out, attns = self.encoder(enc_out, attn_mask=enc_self_mask, tau=tau, delta=delta)
 
-        if self.subtract_last:
-            enc_out = enc_out + seq_last
-
         dec_out = self.dec_embedding(x_dec_new, x_mark_dec)
-
-        if self.subtract_last:
-            seq_last_dec = dec_out[:, -1:, :].detach()
-            dec_out = dec_out - seq_last_dec
-
         dec_out = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask, tau=tau, delta=delta)
 
         # De-normalization

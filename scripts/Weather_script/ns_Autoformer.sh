@@ -19,7 +19,7 @@ python -u run.py \
   --des 'Exp_h256_l2' \
   --p_hidden_dims 256 256 \
   --p_hidden_layers 2 \
-  --itr 1 &
+  --itr 1
 
 python -u run.py \
   --is_training 1 \
@@ -38,11 +38,11 @@ python -u run.py \
   --enc_in 21 \
   --dec_in 21 \
   --c_out 21 \
-  --gpu 1 \
+  --gpu 0 \
   --des 'Exp_h128_l2' \
   --p_hidden_dims 128 128 \
   --p_hidden_layers 2 \
-  --itr 1 &
+  --itr 1
 
 python -u run.py \
   --is_training 1 \
@@ -61,11 +61,11 @@ python -u run.py \
   --enc_in 21 \
   --dec_in 21 \
   --c_out 21 \
-  --gpu 2 \
+  --gpu 0 \
   --des 'Exp_h128_l2' \
   --p_hidden_dims 128 128 \
   --p_hidden_layers 2 \
-  --itr 1 &
+  --itr 1
 
 python -u run.py \
   --is_training 1 \
@@ -84,8 +84,8 @@ python -u run.py \
   --enc_in 21 \
   --dec_in 21 \
   --c_out 21 \
-  --gpu 3 \
+  --gpu 0 \
   --des 'Exp_h128_l2' \
   --p_hidden_dims 128 128 \
   --p_hidden_layers 2 \
-  --itr 1 &
+  --itr 1

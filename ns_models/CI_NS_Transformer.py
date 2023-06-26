@@ -47,7 +47,7 @@ class Model(nn.Module):
         self.pred_len = configs.pred_len
         self.d_model = configs.d_model
         self.nvars = configs.enc_in
-        self.subtract_last = config.subtract_last
+        self.subtract_last = configs.subtract_last
 
         self.embedding = CI_embedding(self.d_model)
         

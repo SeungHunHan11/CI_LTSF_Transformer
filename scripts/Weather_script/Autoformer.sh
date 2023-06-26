@@ -37,7 +37,7 @@ python -u run.py \
   --dec_in 21 \
   --c_out 21 \
   --des 'Exp' \
-  --gpu 5 \
+  --gpu 1 \
   --itr 1 &
 
 python -u run.py \
@@ -58,7 +58,7 @@ python -u run.py \
   --dec_in 21 \
   --c_out 21 \
   --des 'Exp' \
-  --gpu 6 \
+  --gpu 0 \
   --itr 1 &
 
 python -u run.py \
@@ -79,5 +79,5 @@ python -u run.py \
   --dec_in 21 \
   --c_out 21 \
   --des 'Exp' \
-  --gpu 7 \
+  --gpu 0 \
   --itr 1 &

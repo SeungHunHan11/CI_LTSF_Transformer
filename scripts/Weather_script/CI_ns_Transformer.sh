@@ -19,7 +19,9 @@ python -u run.py \
   --des 'Exp_h256_l2' \
   --p_hidden_dims 256 256 \
   --p_hidden_layers 2 \
-  --itr 1 &
+  --itr 1 \
+  --subtract_last \
+  --result_name weather_exp
 
 python -u run.py \
   --is_training 1 \
