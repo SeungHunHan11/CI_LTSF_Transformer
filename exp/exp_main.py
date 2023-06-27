@@ -325,7 +325,7 @@ class Exp_Main(Exp_Basic):
         os.makedirs('./result_json', exist_ok=True)
 
         # Define the file path to save the JSON file
-        file_path = os.path.join('./result_json',self.args.model_id+'.json'
+        file_path = os.path.join('./result_json',self.args.model_id+'.json')
 
         data_name = self.args.data_path.split('.')[0]
 
