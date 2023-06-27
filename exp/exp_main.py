@@ -322,8 +322,10 @@ class Exp_Main(Exp_Basic):
         f.write('\n')
         f.close()
 
+        os.makedirs('./result_json', exist_ok=True)
+
         # Define the file path to save the JSON file
-        file_path = './'+self.args.result_name+'.json'
+        file_path = os.path.join('./result_json',self.args.model_id+'.json'
 
         data_name = self.args.data_path.split('.')[0]
 
@@ -346,26 +348,9 @@ class Exp_Main(Exp_Basic):
             "MAE": round(float(mae),3),
         }
 
-        # Check if the JSON file exists
-        if not os.path.exists(file_path):
-            # Save the experiment details to a JSON file
-            with open(file_path, "w") as json_file:
-                json.dump(experiment_details, json_file, indent=4)
-
-        else:
-            with open(file_path, "r") as json_file:
-                exp_result = json.load(json_file)
-
-            json_file.close()
-            
-            exp_result.update(experiment_details)
-            
-            # Update the existing dictionary with the additional lines
-
-            # Write the updated dictionary back to the JSON file
-            with open(file_path, "w") as json_file:
-                json.dump(exp_result, json_file, indent=4)
-
+        # Save the experiment details to a JSON file
+        with open(file_path, "w") as json_file:
+            json.dump(experiment_details, json_file, indent=4)
 
         np.save(folder_path + 'metrics.npy', np.array([mae, mse, rmse, mape, mspe]))
         np.save(folder_path + 'pred.npy', preds)
