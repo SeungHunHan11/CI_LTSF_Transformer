@@ -1,6 +1,6 @@
-data_set='ETTh1 ETTh2 ETTm1 ETTm2 traffic exchange_rate electricity national_illness weather'
-model_name='Transformer ns_Transformer CI_Transformer CI_NS_Transformer Informer ns_Informer CI_Informer CI_NS_Informer Autoformer ns_Autoformer'
-seqlen='96'
+data_set='ETTh1 ETTh2 ETTm1 ETTm2 traffic electricity'
+model_name='CI_NS_Transformer'
+seqlen='96 144 192 720'
 horizons='96 192 336 720'
 loss='l1 l2'
 
@@ -74,8 +74,8 @@ do
                             --p_hidden_dims 256 256 \
                             --p_hidden_layers 2 \
                             --itr 1 \
-                            --encoder_decoder \
-                            --use_multi_gpu
+                            --use_multi_gpu \
+                            --result_name CI_NS_Result
                     else
                         python -u run.py \
                             --is_training 1 \
@@ -101,9 +101,9 @@ do
                             --p_hidden_dims 256 256 \
                             --p_hidden_layers 2 \
                             --itr 1 \
-                            --use_multi_gpu \                            --encoder_decoder \
-                            --encoder_decoder \
-                            --use_l2
+                            --use_multi_gpu \
+                            --use_l2 \
+                            --result_name CI_NS_Result
                     fi
                 done
             done

@@ -95,9 +95,10 @@ class Model(nn.Module):
         dec_out = self.dec_embedding(seasonal_init, x_mark_dec)
         seasonal_part, trend_part = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask,
                                                  trend=trend_init)
+
         # final
         dec_out = trend_part + seasonal_part
-    
+
         if self.subtract_last: 
             dec_out = dec_out + seq_last
 

@@ -1,8 +1,10 @@
 import argparse
 import torch
 from exp.exp_main import Exp_Main
+from utils.tools import torch_seed, count_parameters
 import random
 import numpy as np
+import os
 
 parser = argparse.ArgumentParser(description='Non-stationary Transformers for Time Series Forecasting')
 
@@ -49,7 +51,7 @@ parser.add_argument('--activation', type=str, default='gelu', help='activation')
 parser.add_argument('--output_attention', action='store_true', help='whether to output attention in encoder')
 parser.add_argument('--do_predict', action='store_true', help='whether to predict unseen future data')
 parser.add_argument('--subtract_last', action='store_true', default=False, help='whether to subtract last value from input sequence')
-
+parser.add_argument('--encoder_decoder', action='store_true', default=False, help='Whether to only use encoder for channel independence model')
 
 
 # optimization
@@ -86,6 +88,8 @@ fix_seed = args.seed
 random.seed(fix_seed)
 torch.manual_seed(fix_seed)
 np.random.seed(fix_seed)
+
+torch_seed(fix_seed)
 
 if args.use_gpu:
     if args.use_multi_gpu:

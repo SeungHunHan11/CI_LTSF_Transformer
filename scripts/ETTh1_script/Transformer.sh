@@ -16,7 +16,7 @@ python -u run.py \
   --c_out 7 \
   --gpu 0 \
   --des 'Exp' \
-  --itr 1 &
+  --itr 1
 
 python -u run.py \
   --is_training 1 \

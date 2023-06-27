@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from layers.Transformer_EncDec import Decoder, DecoderLayer, Encoder, EncoderLayer, ConvLayer
 from layers.SelfAttention_Family import ProbAttention, AttentionLayer
-from layers.Embed import DataEmbedding
+from layers.Embed import DataEmbedding, CI_embedding, DataEmbedding_CI, positional_encoding
 
 class Flatten_Head(nn.Module):
     def __init__(self, individual, n_vars, nf, target_window, head_dropout=0):
@@ -45,30 +45,30 @@ class Model(nn.Module):
     """
     def __init__(self, configs):
         super(Model, self).__init__()
+        self.seq_len = configs.seq_len
         self.pred_len = configs.pred_len
+        self.label_len = configs.label_len
+        self.d_model = configs.d_model
+        self.nvars = configs.enc_in
+        
         self.output_attention = configs.output_attention
         self.subtract_last = configs.subtract_last
         self.encoder_decoder = configs.encoder_decoder
 
-        self.head = Flatten_Head(individual = False, 
-                                 n_vars = configs.c_in, nf = configs.d_model*configs.seq_len, 
-                                 target_window = configs.pred_len, head_dropout=0)     
-        
+        self.embedding = CI_embedding(configs.d_model)
+        self.W_pos = positional_encoding(pe = 'zeros', learn_pe=True, q_len = self.seq_len, d_model = self.d_model)
         
         # Embedding
-
-        # if configs.CI:
-            # self.enc_embedding = DataEmbedding(1, configs.d_model, configs.embed, configs.freq,
-            #                            configs.dropout)
-
-            # self.dec_embedding = DataEmbedding(1, configs.d_model, configs.embed, configs.freq,
-            #                                    configs.dropout)
-
-
-        self.enc_embedding = DataEmbedding(configs.enc_in, configs.d_model, configs.embed, configs.freq,
+        
+        self.enc_embedding = DataEmbedding_CI(1, configs.d_model, self.nvars, configs.embed, configs.freq,
                                            configs.dropout)
-        self.dec_embedding = DataEmbedding(configs.dec_in, configs.d_model, configs.embed, configs.freq,
+        self.dec_embedding = DataEmbedding_CI(1, configs.d_model, self.nvars, configs.embed, configs.freq,
                                            configs.dropout)
+
+        # self.enc_embedding = DataEmbedding(configs.enc_in, configs.d_model, configs.embed, configs.freq,
+        #                                    configs.dropout)
+        # self.dec_embedding = DataEmbedding(configs.dec_in, configs.d_model, configs.embed, configs.freq,
+        #                                    configs.dropout)
 
         # Encoder
         self.encoder = Encoder(
@@ -84,11 +84,6 @@ class Model(nn.Module):
                     activation=configs.activation
                 ) for l in range(configs.e_layers)
             ],
-            [
-                ConvLayer(
-                    configs.d_model
-                ) for l in range(configs.e_layers - 1)
-            ] if configs.distil else None,
             norm_layer=torch.nn.LayerNorm(configs.d_model)
         )
         # Decoder
@@ -109,8 +104,18 @@ class Model(nn.Module):
                 for l in range(configs.d_layers)
             ],
             norm_layer=torch.nn.LayerNorm(configs.d_model),
-            projection=nn.Linear(configs.d_model, configs.c_out, bias=True)
+            # projection=nn.Linear(configs.d_model, configs.c_out, bias=True)
         )
+
+        if self.encoder_decoder:
+            self.head = Flatten_Head(individual = False, 
+                                    n_vars = self.nvars, nf = self.d_model*(self.label_len+self.pred_len), 
+                                    target_window = self.pred_len, head_dropout=0)
+        else:
+            self.head = Flatten_Head(individual = False, 
+                                    n_vars = self.nvars, nf = self.d_model*self.seq_len, 
+                                    target_window = self.pred_len, head_dropout=0)    
+        
 
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec,
                 enc_self_mask=None, dec_self_mask=None, dec_enc_mask=None): 
@@ -122,39 +127,50 @@ class Model(nn.Module):
         x_mark_dec: (bsz, label_len+pred_len, 4)
         '''
 
-        # bsz, seq_len, nvars = x_enc.shape
+        bsz, seq_len, nvars = x_enc.shape
 
         if self.subtract_last:
             seq_last = x_enc[:, -1:, :].detach()
             x_enc = x_enc - seq_last
 
-        # if self.CI:
+        if self.encoder_decoder:
 
-            # x_enc = x_enc.unsqueeze(-1).reshape(bsz, nvars, seq_len, 1)
-            # x_dec = x_dec.unsqueeze(-1).reshape(bsz, nvars, label_len+pred_len, 1)
-            # x_mark_enc = x_mark_enc.unsqueeze(-1).reshape(bsz, 4, seq_len, 1)
-            # x_mark_dec = x_mark_dec.unsqueeze(-1).reshape(bsz, 4, label_len+pred_len, 1)
+            x_enc = x_enc.reshape(bsz*nvars, seq_len, 1)
+            x_dec = x_dec.reshape(bsz*nvars, self.label_len+self.pred_len, 1)
+            x_mark_enc = x_mark_enc.reshape(bsz, seq_len, 4)
+            x_mark_dec = x_mark_dec.reshape(bsz, self.label_len+self.pred_len, 4)
+            
+            enc_out = self.enc_embedding(x_enc, x_mark_enc) # (bsz, seq_len, d_model)
+            enc_out = enc_out.reshape(bsz*nvars, seq_len, self.d_model)
+            enc_out, attns = self.encoder(enc_out, attn_mask=enc_self_mask)
+            enc_out = enc_out.reshape(-1, self.seq_len, self.d_model)
 
-            # enc_out = self.enc_embedding(x_enc, x_mark_enc) # (bsz, seq_len, d_model)
-            # enc_out = enc_out.reshape(-1, self.seq_len, self.d_model)
+            dec_out = self.dec_embedding(x_dec, x_mark_dec) # (bsz, seq_len, d_model)
+            dec_out = dec_out.reshape(-1, self.label_len+self.pred_len, self.d_model)
+            output = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask) # (bsz * nvars, label_len+pred_len, d_model)
+            
+            dec_out = dec_out.reshape(-1, self.nvars, self.label_len+self.pred_len, self.d_model) # (bsz, nvars, label_len+pred_len, d_model)
+            
+            output = self.head(dec_out) # (bsz, nvars, label_len+pred_len)
+            output = output.permute(0,2,1) # (bsz, label_len+pred_len, nvars)
+        
+        else:
 
-            # dec_out = self.DataEmbedding(x_dec, x_mark_dec) # (bsz, seq_len, d_model)
-            # dec_out = dec_out.reshape(-1, self.label_len+self.pred_len, self.d_model)
-            # dec_out = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask) # (bsz * nvars, label_len+pred_len, d_model)
-            # dec_out = self.head(dec_out) # (bsz, nvars, label_len+pred_len)
+            output = self.embedding(x_enc) # (bsz, seq_len, nvars, d_model)
+            output = output.permute(0,2,1,3) # (bsz, nvars, seq_len, d_model)
+            output = output.reshape(-1, self.seq_len, self.d_model) # (bsz*nvars, seq_len, d_model)
+            output = output + self.W_pos # (bsz*nvars, seq_len, d_model)
 
-        # else:
-
-        enc_out = self.enc_embedding(x_enc, x_mark_enc) # (bsz, seq_len, d_model)
-        enc_out, attns = self.encoder(enc_out, attn_mask=enc_self_mask) # (bsz, seq_len, d_model)
-
-        dec_out = self.dec_embedding(x_dec, x_mark_dec) # (bsz, label_len+pred_len, d_model)
-        dec_out = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask) # (bsz, label_len+pred_len, d_model)
+            output, _ = self.encoder(output, attn_mask = None)
+            output = output.reshape(-1, self.nvars, self.seq_len, self.d_model) # (bsz, nvars, seq_len, d_model) # Connect this output to Flatten Head for forecasting
+            
+            output = self.head(output) # (bsz, nvars, pred_len)
+            output = output.permute(0,2,1) # (bsz, pred_len, nvars)
 
         if self.subtract_last: 
-            dec_out = dec_out + seq_last
+            output = output + seq_last
 
         if self.output_attention:
-            return dec_out[:, -self.pred_len:, :], attns
+            return output, attns
         else:
-            return dec_out[:, -self.pred_len:, :]  # [B, L, D]
+            return output  # [B, L, D]

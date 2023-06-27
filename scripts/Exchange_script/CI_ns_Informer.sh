@@ -3,7 +3,7 @@ python -u run.py \
   --root_path ./dataset/exchange_rate/ \
   --data_path exchange_rate.csv \
   --model_id Exchange_96_96 \
-  --model CI_NS_Transformer \
+  --model CI_NS_Informer \
   --data custom \
   --features M \
   --seq_len 96 \
@@ -20,16 +20,15 @@ python -u run.py \
   --p_hidden_dims 16 16 \
   --p_hidden_layers 2 \
   --itr 1 \
-  --subtract_last \
-  --result_name encoder_decoder \
-  --encoder_decoder
+  --devices 0,1 \
+  --use_multi_gpu \
 
 python -u run.py \
   --is_training 1 \
   --root_path ./dataset/exchange_rate/ \
   --data_path exchange_rate.csv \
   --model_id Exchange_96_192 \
-  --model CI_NS_Transformer \
+  --model CI_NS_Informer \
   --data custom \
   --features M \
   --seq_len 96 \
@@ -55,7 +54,7 @@ python -u run.py \
   --root_path ./dataset/exchange_rate/ \
   --data_path exchange_rate.csv \
   --model_id Exchange_96_336 \
-  --model CI_NS_Transformer \
+  --model CI_NS_Informer \
   --data custom \
   --features M \
   --seq_len 96 \
@@ -82,7 +81,7 @@ python -u run.py \
   --root_path ./dataset/exchange_rate/ \
   --data_path exchange_rate.csv \
   --model_id Exchange_96_720 \
-  --model CI_NS_Transformer \
+  --model CI_NS_Informer \
   --data custom \
   --features M \
   --seq_len 96 \

@@ -1,10 +1,9 @@
-import torch.nn as nn
-import torch.nn.functional as F
-from ns_layers.Embed import CI_embedding, positional_encoding, DataEmbedding, DataEmbedding_CI
-from ns_layers.SelfAttention_Family import DSAttention, AttentionLayer
-from ns_layers.Transformer_EncDec import Encoder, EncoderLayer, Decoder, DecoderLayer
-
 import torch
+import torch.nn as nn
+from ns_layers.Transformer_EncDec import Decoder, DecoderLayer, Encoder, EncoderLayer, ConvLayer
+from ns_layers.SelfAttention_Family import DSProbAttention, AttentionLayer
+from layers.Embed import CI_embedding, DataEmbedding, positional_encoding, DataEmbedding, DataEmbedding_CI
+
 
 class Projector(nn.Module):
     '''
@@ -35,13 +34,10 @@ class Projector(nn.Module):
 
         return y
 
-
-
 class Model(nn.Module):
     """
-    Non-Stationary Transformer (Encoder) with Channel-Independece
+    Non-stationary Informer
     """
-
     def __init__(self, configs):
         super(Model, self).__init__()
         self.seq_len = configs.seq_len
@@ -49,23 +45,21 @@ class Model(nn.Module):
         self.label_len = configs.label_len
         self.d_model = configs.d_model
         self.nvars = configs.enc_in
-        self.subtract_last = configs.subtract_last
+
         self.encoder_decoder = configs.encoder_decoder
-        
+        self.output_attention = configs.output_attention
+        self.subtract_last = configs.subtract_last
+
         self.embedding = CI_embedding(self.d_model)
         self.W_pos = positional_encoding(pe = 'zeros', learn_pe=True, q_len = self.seq_len, d_model = self.d_model)
         
         # Embedding
-        # self.enc_embedding = DataEmbedding(1, configs.d_model, configs.embed, configs.freq,
-        #                                    configs.dropout)
-        # self.dec_embedding = DataEmbedding(1, configs.d_model, configs.embed, configs.freq,
-        #                                    configs.dropout)
-
         self.enc_embedding = DataEmbedding_CI(1, configs.d_model, self.nvars, configs.embed, configs.freq,
                                            configs.dropout)
         self.dec_embedding = DataEmbedding_CI(1, configs.d_model, self.nvars, configs.embed, configs.freq,
                                            configs.dropout)
 
+        
         self.tau_learner = Projector(
                                 enc_in = self.nvars, 
                                 seq_len = self.seq_len, 
@@ -84,42 +78,42 @@ class Model(nn.Module):
                                 kernel_size=3
                                 )
         
+        # Encoder
         self.encoder = Encoder(
-                                [
-                                    EncoderLayer(
-                                        AttentionLayer(
-                                            DSAttention(False, 5, attention_dropout=0.1,
-                                                        output_attention=False), self.d_model, configs.n_heads),
-                                                        configs.d_model,
-                                                        configs.d_ff,
-                                                        dropout=configs.dropout,
-                                                        activation=configs.activation
-                                    ) for l in range(configs.e_layers
-                                                     )
-                                ],
-                                norm_layer=torch.nn.LayerNorm(configs.d_model)
-                            )           
-
+            [
+                EncoderLayer(
+                    AttentionLayer(
+                        DSProbAttention(False, configs.factor, attention_dropout=configs.dropout,
+                                      output_attention=configs.output_attention),
+                        configs.d_model, configs.n_heads),
+                    configs.d_model,
+                    configs.d_ff,
+                    dropout=configs.dropout,
+                    activation=configs.activation
+                ) for l in range(configs.e_layers)
+            ],
+            norm_layer=torch.nn.LayerNorm(configs.d_model)
+        )
         # Decoder
         self.decoder = Decoder(
-                                [
-                                    DecoderLayer(
-                                        AttentionLayer(
-                                            DSAttention(True, configs.factor, attention_dropout=configs.dropout, output_attention=False),
-                                            configs.d_model, configs.n_heads),
-                                        AttentionLayer(
-                                            DSAttention(False, configs.factor, attention_dropout=configs.dropout, output_attention=False),
-                                            configs.d_model, configs.n_heads),
-                                        configs.d_model,
-                                        configs.d_ff,
-                                        dropout=configs.dropout,
-                                        activation=configs.activation,
-                                    )
-                                    for l in range(configs.d_layers)
-                                ],
-                                norm_layer=torch.nn.LayerNorm(configs.d_model),
-                                # projection=nn.Linear(configs.d_model, configs.c_out, bias=True)
-                            )
+            [
+                DecoderLayer(
+                    AttentionLayer(
+                        DSProbAttention(True, configs.factor, attention_dropout=configs.dropout, output_attention=False),
+                        configs.d_model, configs.n_heads),
+                    AttentionLayer(
+                        DSProbAttention(False, configs.factor, attention_dropout=configs.dropout, output_attention=False),
+                        configs.d_model, configs.n_heads),
+                    configs.d_model,
+                    configs.d_ff,
+                    dropout=configs.dropout,
+                    activation=configs.activation,
+                )
+                for l in range(configs.d_layers)
+            ],
+            norm_layer=torch.nn.LayerNorm(configs.d_model),
+            # projection=nn.Linear(configs.d_model, configs.c_out, bias=True)
+        )
 
         if self.encoder_decoder:
             self.head = Flatten_Head(individual = False, 
@@ -132,7 +126,7 @@ class Model(nn.Module):
      
 
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec,
-                enc_self_mask=None, dec_self_mask=None, dec_enc_mask=None): # (bsz, seq_len, nvars)
+                enc_self_mask=None, dec_self_mask=None, dec_enc_mask=None):
 
         bsz, seq_len, nvars = x_enc.shape
 
@@ -141,7 +135,7 @@ class Model(nn.Module):
         if self.subtract_last:
             seq_last = x_raw[:, -1:, :].detach()
             x_enc = x_enc - seq_last
-        
+
         x_mean = x_enc.mean(1, keepdim=True).detach() # bsz x 1 x nvars
         x_enc = x_enc - x_mean # bsz x seq_len x nvars
 

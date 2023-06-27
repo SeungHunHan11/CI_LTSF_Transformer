@@ -2,7 +2,37 @@ import torch
 import torch.nn as nn
 import math
 
+class moving_avg(nn.Module):
+    """
+    Moving average block to highlight the trend of time series
+    """
+    def __init__(self, kernel_size, stride):
+        super(moving_avg, self).__init__()
+        self.kernel_size = kernel_size
+        self.avg = nn.AvgPool1d(kernel_size=kernel_size, stride=stride, padding=0)
 
+    def forward(self, x):
+        # padding on the both ends of time series
+        front = x[:, 0:1, :].repeat(1, (self.kernel_size - 1) // 2, 1)
+        end = x[:, -1:, :].repeat(1, (self.kernel_size - 1) // 2, 1)
+        x = torch.cat([front, x, end], dim=1)
+        x = self.avg(x.permute(0, 2, 1))
+        x = x.permute(0, 2, 1)
+        return x
+
+class series_decomp(nn.Module):
+    """
+    Series decomposition block
+    """
+    def __init__(self, kernel_size):
+        super(series_decomp, self).__init__()
+        self.moving_avg = moving_avg(kernel_size, stride=1)
+
+    def forward(self, x):
+        moving_mean = self.moving_avg(x)
+        res = x - moving_mean
+        return res, moving_mean
+    
 class PositionalEmbedding(nn.Module):
     def __init__(self, d_model, max_len=5000):
         super(PositionalEmbedding, self).__init__()
@@ -99,7 +129,6 @@ class TimeFeatureEmbedding(nn.Module):
     def forward(self, x):
         return self.embed(x)
 
-
 class DataEmbedding(nn.Module):
     def __init__(self, c_in, d_model, embed_type='fixed', freq='h', dropout=0.1):
         super(DataEmbedding, self).__init__()
@@ -112,8 +141,32 @@ class DataEmbedding(nn.Module):
         self.dropout = nn.Dropout(p=dropout)
 
     def forward(self, x, x_mark):
+                
         x = self.value_embedding(x) + self.temporal_embedding(x_mark) + self.position_embedding(x)
         return self.dropout(x)
+
+class DataEmbedding_CI(nn.Module):
+    def __init__(self, c_in, d_model, nvars, embed_type='fixed', freq='h', dropout=0.1, ):
+        super(DataEmbedding_CI, self).__init__()
+
+        self.nvars = nvars
+        self.d_model = d_model
+        self.value_embedding = TokenEmbedding(c_in=c_in, d_model=d_model)
+        self.position_embedding = PositionalEmbedding(d_model=d_model)
+        self.temporal_embedding = TemporalEmbedding(d_model=d_model, embed_type=embed_type,
+                                                    freq=freq) if embed_type != 'timeF' else TimeFeatureEmbedding(
+            d_model=d_model, embed_type=embed_type, freq=freq)
+        self.dropout = nn.Dropout(p=dropout)
+
+    def forward(self, x, x_mark):
+
+        _, seq_len, _ = x.size()
+        
+        
+        x = self.value_embedding(x).reshape(-1,self.nvars,seq_len,self.d_model) + self.temporal_embedding(x_mark).reshape(-1,1,seq_len,self.d_model) + self.position_embedding(x).reshape(1,1,seq_len,self.d_model)
+        
+        return self.dropout(x)
+
 
 class DataEmbedding_wo_pos(nn.Module):
     def __init__(self, c_in, d_model, embed_type='fixed', freq='h', dropout=0.1):
@@ -129,6 +182,29 @@ class DataEmbedding_wo_pos(nn.Module):
     def forward(self, x, x_mark):
         x = self.value_embedding(x) + self.temporal_embedding(x_mark)
         return self.dropout(x)
+
+class DataEmbedding_wo_pos_CI(nn.Module):
+    def __init__(self, c_in, d_model, nvars, embed_type='fixed', freq='h', dropout=0.1, ):
+        super(DataEmbedding_wo_pos_CI, self).__init__()
+
+        self.nvars = nvars
+        self.d_model = d_model
+        self.value_embedding = TokenEmbedding(c_in=c_in, d_model=d_model)
+        self.position_embedding = PositionalEmbedding(d_model=d_model)
+        self.temporal_embedding = TemporalEmbedding(d_model=d_model, embed_type=embed_type,
+                                                    freq=freq) if embed_type != 'timeF' else TimeFeatureEmbedding(
+            d_model=d_model, embed_type=embed_type, freq=freq)
+        self.dropout = nn.Dropout(p=dropout)
+
+    def forward(self, x, x_mark):
+
+        _, seq_len, _ = x.size()
+        
+        
+        x = self.value_embedding(x).reshape(-1,self.nvars,seq_len,self.d_model) + self.temporal_embedding(x_mark).reshape(-1,1,seq_len,self.d_model)
+        
+        return self.dropout(x)
+
 
 def Coord1dPosEncoding(q_len, exponential=False, normalize=True):
     cpe = (2 * (torch.linspace(0, 1, q_len).reshape(-1, 1)**(.5 if exponential else 1)) - 1)

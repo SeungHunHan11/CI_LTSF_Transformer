@@ -1,8 +1,8 @@
 from data_provider.data_factory import data_provider
 from exp.exp_basic import Exp_Basic
-from models import Transformer, Informer, Autoformer
-from ns_models import ns_Transformer, ns_Informer, ns_Autoformer, CI_NS_Transformer
-from utils.tools import EarlyStopping, adjust_learning_rate, visual
+from models import Transformer, CI_Transformer, Informer, CI_Informer,Autoformer, CI_Autoformer
+from ns_models import ns_Transformer, CI_NS_Transformer, ns_Informer,CI_NS_Informer, ns_Autoformer
+from utils.tools import EarlyStopping, adjust_learning_rate, visual, count_parameters, save_json
 from utils.metrics import metric
 
 import numpy as np
@@ -17,6 +17,8 @@ import warnings
 import matplotlib.pyplot as plt
 import numpy as np
 
+import json
+
 warnings.filterwarnings('ignore')
 
 
@@ -27,12 +29,18 @@ class Exp_Main(Exp_Basic):
     def _build_model(self):
         model_dict = {
             'Transformer': Transformer,
-            'Informer': Informer,
-            'Autoformer': Autoformer,
             'ns_Transformer': ns_Transformer,
-            'ns_Informer': ns_Informer,
-            'ns_Autoformer': ns_Autoformer,
+            'CI_Transformer' : CI_Transformer,
             'CI_NS_Transformer': CI_NS_Transformer,
+
+            'Informer': Informer,
+            'ns_Informer': ns_Informer,
+            'CI_Informer': CI_Informer,
+            'CI_NS_Informer': CI_NS_Informer,
+
+            'Autoformer': Autoformer,
+            'ns_Autoformer': ns_Autoformer,
+            'CI_Autoformer': CI_Autoformer,
         }
         model = model_dict[self.args.model].Model(self.args).float()
 
@@ -55,7 +63,9 @@ class Exp_Main(Exp_Basic):
             criterion = nn.MSELoss()
         else:
             criterion = nn.L1Loss()
-            
+
+        self.criterion = criterion
+
         return criterion
 
     def vali(self, vali_data, vali_loader, criterion):
@@ -75,14 +85,11 @@ class Exp_Main(Exp_Basic):
                 dec_inp = torch.zeros_like(batch_y[:, -self.args.pred_len:, :]).float()
                 dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
 
-                if self.CI:
-                    inp = {'x':batch_x}
-                else:
-                    inp = {'x_enc':batch_x, 
-                           'x_mark_enc':batch_x_mark, 
-                           'x_dec':dec_inp, 
-                           'x_mark_dec':batch_y_mark
-                    }
+                inp = {'x_enc':batch_x, 
+                        'x_mark_enc':batch_x_mark, 
+                        'x_dec':dec_inp, 
+                        'x_mark_dec':batch_y_mark
+                }
 
                 # encoder - decoder
                 if self.args.use_amp:
@@ -101,8 +108,6 @@ class Exp_Main(Exp_Basic):
                         outputs = self.model(**inp)
                         # outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
 
-                if not self.CI:
-                    outputs = outputs[:, -self.args.pred_len:, f_dim:]
                 batch_y = batch_y[:, -self.args.pred_len:, f_dim:]
 
                 pred = outputs.detach().cpu()
@@ -157,14 +162,12 @@ class Exp_Main(Exp_Basic):
                 dec_inp = torch.zeros_like(batch_y[:, -self.args.pred_len:, :]).float()
                 dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
 
-                if self.CI:
-                    inp = {'x':batch_x}
-                else:
-                    inp = {'x_enc':batch_x, 
-                           'x_mark_enc':batch_x_mark, 
-                           'x_dec':dec_inp, 
-                           'x_mark_dec':batch_y_mark
-                    }
+                inp = {'x_enc':batch_x, 
+                        'x_mark_enc':batch_x_mark, 
+                        'x_dec':dec_inp, 
+                        'x_mark_dec':batch_y_mark
+                }
+
 
                 # encoder - decoder
                 if self.args.use_amp:
@@ -175,10 +178,7 @@ class Exp_Main(Exp_Basic):
                         else:   
                             outputs = self.model(**inp)
                             # outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
-
-                        if not self.CI:
-                            outputs = outputs[:, -self.args.pred_len:, f_dim:]
-
+                            
                         batch_y = batch_y[:, -self.args.pred_len:, f_dim:]
 
                         loss = criterion(outputs, batch_y)
@@ -191,9 +191,6 @@ class Exp_Main(Exp_Basic):
                     else:
                         outputs = self.model(**inp)
                         # outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
-                        
-                    if not self.CI:
-                        outputs = outputs[:, -self.args.pred_len:, f_dim:]
 
                     batch_y = batch_y[:, -self.args.pred_len:, f_dim:]
 
@@ -262,18 +259,17 @@ class Exp_Main(Exp_Basic):
                 dec_inp = torch.zeros_like(batch_y[:, -self.args.pred_len:, :]).float()
                 dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
 
-                if self.CI:
-                    inp = {'x':batch_x}
-                else:
-                    inp = {'x_enc':batch_x, 
-                           'x_mark_enc':batch_x_mark, 
-                           'x_dec':dec_inp, 
-                           'x_mark_dec':batch_y_mark
-                    }
+                inp = {'x_enc':batch_x, 
+                        'x_mark_enc':batch_x_mark, 
+                        'x_dec':dec_inp, 
+                        'x_mark_dec':batch_y_mark
+                }
+
                 # encoder - decoder
                 if self.args.use_amp:
                     with torch.cuda.amp.autocast():
                         if self.args.output_attention:
+                    
                             outputs = self.model(**inp)[0]
                             # outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
                         else:
@@ -287,8 +283,7 @@ class Exp_Main(Exp_Basic):
                         outputs = self.model(**inp)
                         # outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
 
-                if not self.CI:
-                    outputs = outputs[:, -self.args.pred_len:, f_dim:]
+               
                 batch_y = batch_y[:, -self.args.pred_len:, f_dim:]
 
                 outputs = outputs.detach().cpu().numpy()
@@ -322,9 +317,55 @@ class Exp_Main(Exp_Basic):
         f = open(self.args.result_name+".txt", 'a')
         f.write(setting + "  \n")
         f.write('mse:{}, mae:{}'.format(mse, mae))
+        f.write('count_parameters:{}'.format(count_parameters(self.model)))
         f.write('\n')
         f.write('\n')
         f.close()
+
+        # Define the file path to save the JSON file
+        file_path = './'+self.args.result_name+'.json'
+
+        data_name = self.args.data_path.split('.')[0]
+
+        # Define the experiment details
+        experiment_details = {
+            "Dataset": data_name,
+            'Model_details':{
+                        "Model" : self.args.model,
+                        "Parameter Num" : float(count_parameters(self.model))
+                        },
+            "Exp_details":{
+                        "Seq_len" : self.args.seq_len,
+                        "Pred_len" : self.args.pred_len,
+                        "n_vars" : self.args.enc_in,
+                        "subtract_last" : str(self.args.subtract_last),
+                        "encoder_decoder" : str(self.args.encoder_decoder),
+                        "Loss_Func": str(self.criterion._get_name())
+                        },            
+            "MSE": round(float(mse),3),
+            "MAE": round(float(mae),3),
+        }
+
+        # Check if the JSON file exists
+        if not os.path.exists(file_path):
+            # Save the experiment details to a JSON file
+            with open(file_path, "w") as json_file:
+                json.dump(experiment_details, json_file, indent=4)
+
+        else:
+            with open(file_path, "r") as json_file:
+                exp_result = json.load(json_file)
+
+            json_file.close()
+            
+            exp_result.update(experiment_details)
+            
+            # Update the existing dictionary with the additional lines
+
+            # Write the updated dictionary back to the JSON file
+            with open(file_path, "w") as json_file:
+                json.dump(exp_result, json_file, indent=4)
+
 
         np.save(folder_path + 'metrics.npy', np.array([mae, mse, rmse, mape, mspe]))
         np.save(folder_path + 'pred.npy', preds)
@@ -354,14 +395,12 @@ class Exp_Main(Exp_Basic):
                 dec_inp = torch.zeros([batch_y.shape[0], self.args.pred_len, batch_y.shape[2]]).float()
                 dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
 
-                if self.CI:
-                    inp = {'x':batch_x}
-                else:
-                    inp = {'x_enc':batch_x, 
-                           'x_mark_enc':batch_x_mark, 
-                           'x_dec':dec_inp, 
-                           'x_mark_dec':batch_y_mark
-                    }
+                inp = {'x_enc':batch_x, 
+                        'x_mark_enc':batch_x_mark, 
+                        'x_dec':dec_inp, 
+                        'x_mark_dec':batch_y_mark
+                }
+
                 # encoder - decoder
                 if self.args.use_amp:
                     with torch.cuda.amp.autocast():
@@ -393,3 +432,14 @@ class Exp_Main(Exp_Basic):
         np.save(folder_path + 'real_prediction.npy', preds)
 
         return
+
+
+
+
+    
+# sample = torch.randn(32, 96, 7)
+
+# decomp = series_decomp(3)
+# decomp(sample)[0].shape
+# decomp(sample)[1].shape
+

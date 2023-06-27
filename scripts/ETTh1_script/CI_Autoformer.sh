@@ -3,7 +3,7 @@ python -u run.py \
   --root_path ./dataset/ETT-small/ \
   --data_path ETTh1.csv \
   --model_id ETTh1_96_96 \
-  --model Autoformer \
+  --model CI_Autoformer \
   --data ETTh1 \
   --features M \
   --seq_len 96 \
@@ -16,14 +16,15 @@ python -u run.py \
   --c_out 7 \
   --gpu 0 \
   --des 'Exp' \
-  --itr 1 &
-32 144 7
+  --itr 1 & \
+
+
 python -u run.py \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
   --data_path ETTh1.csv \
   --model_id ETTh1_96_192 \
-  --model Autoformer \
+  --model CI_Autoformer \
   --data ETTh1 \
   --features M \
   --seq_len 96 \
@@ -34,16 +35,16 @@ python -u run.py \
   --enc_in 7 \
   --dec_in 7 \
   --c_out 7 \
-  --gpu 5 \
+  --gpu 0 \
   --des 'Exp' \
-  --itr 1  &
+  --itr 1
 
 python -u run.py \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
   --data_path ETTh1.csv \
   --model_id ETTh1_96_336 \
-  --model Autoformer \
+  --model CI_Autoformer \
   --data ETTh1 \
   --features M \
   --seq_len 96 \
@@ -54,16 +55,16 @@ python -u run.py \
   --enc_in 7 \
   --dec_in 7 \
   --c_out 7 \
-  --gpu 6 \
+  --gpu 0 \
   --des 'Exp' \
-  --itr 1 &
+  --itr 1
 
 python -u run.py \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
   --data_path ETTh1.csv \
   --model_id ETTh1_96_720 \
-  --model Autoformer \
+  --model CI_Autoformer \
   --data ETTh1 \
   --features M \
   --seq_len 96 \
@@ -74,6 +75,6 @@ python -u run.py \
   --enc_in 7 \
   --dec_in 7 \
   --c_out 7 \
-  --gpu 7 \
+  --gpu 0 \
   --des 'Exp' \
-  --itr 1 &
+  --itr 1

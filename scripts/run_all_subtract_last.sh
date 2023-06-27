@@ -74,6 +74,7 @@ do
                             --p_hidden_layers 2 \
                             --itr 1 \
                             --subtract_last \
+                            --encoder_decoder \
                             --result_name subtract_last_result
                     else
                         python -u run.py \
@@ -100,6 +101,7 @@ do
                             --p_hidden_layers 2 \
                             --itr 1 \
                             --subtract_last \
+                            --encoder_decoder \
                             --result_name subtract_last_result \
                             --use_l2
                     fi

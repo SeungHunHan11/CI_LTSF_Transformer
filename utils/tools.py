@@ -1,6 +1,9 @@
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
+import random
+import os
+import json
 
 plt.switch_backend('agg')
 
@@ -82,3 +85,33 @@ def visual(true, preds=None, name='./pic/test.pdf'):
         plt.plot(preds, label='Prediction', linewidth=2)
     plt.legend()
     plt.savefig(name, bbox_inches='tight')
+
+def torch_seed(random_seed):
+    torch.manual_seed(random_seed)
+    torch.cuda.manual_seed(random_seed)
+    torch.cuda.manual_seed_all(random_seed) # if use multi-GPU 
+    # CUDA randomness
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    
+    np.random.seed(random_seed)
+    random.seed(random_seed)
+    os.environ['PYTHONHASHSEED'] = str(random_seed)
+
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+def save_json(self, result, output_dir: str, save_name: str) -> None:
+    """
+    Save the result to json file
+    :param output_dir: str
+        output directory
+    :param save_name: str
+        file name
+    :return: None
+    """
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    outpath = os.path.join(output_dir, f'{save_name}_exp_result.json')
+    with open(outpath, 'w') as f:
+        json.dump(result, f, indent=4)

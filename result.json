@@ -1,0 +1,17 @@
+{
+    "Dataset": "exchange_rate",
+    "Model_details": {
+        "Model": "CI_NS_Informer",
+        "Parameter Num": 15300448.0
+    },
+    "Exp_details": {
+        "Seq_len": 96,
+        "Pred_len": 96,
+        "n_vars": 8,
+        "subtract_last": "False",
+        "encoder_decoder": "False",
+        "Loss_Func": "L1Loss"
+    },
+    "MSE": 0.088,
+    "MAE": 0.209
+}
