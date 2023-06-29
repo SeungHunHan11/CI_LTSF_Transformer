@@ -1,0 +1,21 @@
+{
+    "Dataset": "ETTh2",
+    "Model_details": {
+        "Model": "CI_NS_Informer",
+        "Parameter Num": 15600032.0
+    },
+    "Exp_details": {
+        "Seq_len": 96,
+        "Pred_len": 96,
+        "n_vars": 7,
+        "subtract_last": "False",
+        "encoder_decoder": "False",
+        "Loss_Func": "MSELoss"
+    },
+    "Metrics": {
+        "Train Loss": 0.296,
+        "Val Loss": 0.265,
+        "MSE": 0.335,
+        "MAE": 0.375
+    }
+}

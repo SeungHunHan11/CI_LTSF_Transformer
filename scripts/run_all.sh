@@ -16,37 +16,61 @@ do
                 do
                     if [ "$data" = "electricity" ]; then
                         path=electricity
+                        data_name=custom
                         enc_in=321
                         dec_in=321
                         c_out=321
                     elif [ "$data" = "traffic" ]; then
                         path=traffic
+                        data_name=custom
                         enc_in=862
                         dec_in=862
                         c_out=862
                     elif [ "$data" = "weather" ]; then
                         path=weather
+                        data_name=custom
                         enc_in=21
                         dec_in=21
                         c_out=21
                     elif [ "$data" = "exchange_rate" ]; then
                         path=exchange_rate
+                        data_name=custom
                         enc_in=8
                         dec_in=8
                         c_out=8
                     elif [ "$data" = "national_illness" ]; then
                         path=illness
+                        data_name=custom
                         enc_in=7
                         dec_in=7
                         c_out=7
-                    else
+                    elif [ "$data" = "ETTh1" ]; then
                         path=ETT-small
+                        data_name=ETTh1
+                        enc_in=7
+                        dec_in=7
+                        c_out=7
+                    elif [ "$data" = "ETTh2" ]; then
+                        path=ETT-small
+                        data_name=ETTh2
+                        enc_in=7
+                        dec_in=7
+                        c_out=7
+                    elif [ "$data" = "ETTm1" ]; then
+                        path=ETT-small
+                        data_name=ETTm1
+                        enc_in=7
+                        dec_in=7
+                        c_out=7
+                    elif [ "$data" = "ETTm2" ]; then
+                        path=ETT-small
+                        data_name=ETTm2
                         enc_in=7
                         dec_in=7
                         c_out=7
                     fi
 
-                    model_id="$data-$lookback-$horizon"
+                    model_id="$data_name-$lookback-$horizon"
                     echo $model_id
 
                     if [ "$lss" = "l1" ]; then
@@ -56,10 +80,10 @@ do
                             --data_path $data.csv \
                             --model_id $model_id \
                             --model $model \
-                            --data custom \
+                            --data $data_name \
                             --features M \
                             --seq_len $lookback \
-                            --batch_size 16 \
+                            --batch_size 32 \
                             --label_len 48 \
                             --pred_len $horizon \
                             --e_layers 2 \
@@ -74,7 +98,6 @@ do
                             --p_hidden_dims 256 256 \
                             --p_hidden_layers 2 \
                             --itr 1 \
-                            --encoder_decoder \
                             --use_multi_gpu
                     else
                         python -u run.py \
@@ -83,10 +106,10 @@ do
                             --data_path $data.csv \
                             --model_id $model_id \
                             --model $model \
-                            --data custom \
+                            --data $data_name \
                             --features M \
                             --seq_len $lookback \
-                            --batch_size 16 \
+                            --batch_size 32 \
                             --label_len 48 \
                             --pred_len $horizon \
                             --e_layers 2 \
@@ -101,8 +124,7 @@ do
                             --p_hidden_dims 256 256 \
                             --p_hidden_layers 2 \
                             --itr 1 \
-                            --use_multi_gpu \                            --encoder_decoder \
-                            --encoder_decoder \
+                            --use_multi_gpu \
                             --use_l2
                     fi
                 done

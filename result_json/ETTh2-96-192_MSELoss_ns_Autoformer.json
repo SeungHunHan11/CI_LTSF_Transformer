@@ -1,0 +1,21 @@
+{
+    "Dataset": "ETTh2",
+    "Model_details": {
+        "Model": "ns_Autoformer",
+        "Parameter Num": 10700615.0
+    },
+    "Exp_details": {
+        "Seq_len": 96,
+        "Pred_len": 192,
+        "n_vars": 7,
+        "subtract_last": "False",
+        "encoder_decoder": "False",
+        "Loss_Func": "MSELoss"
+    },
+    "Metrics": {
+        "Train Loss": 0.45,
+        "Val Loss": 0.405,
+        "MSE": 0.469,
+        "MAE": 0.451
+    }
+}

@@ -1,0 +1,21 @@
+{
+    "Dataset": "ETTm1",
+    "Model_details": {
+        "Model": "CI_NS_Informer",
+        "Parameter Num": 20318720.0
+    },
+    "Exp_details": {
+        "Seq_len": 96,
+        "Pred_len": 192,
+        "n_vars": 7,
+        "subtract_last": "False",
+        "encoder_decoder": "False",
+        "Loss_Func": "MSELoss"
+    },
+    "Metrics": {
+        "Train Loss": 0.271,
+        "Val Loss": 0.598,
+        "MSE": 0.428,
+        "MAE": 0.424
+    }
+}

@@ -1,0 +1,21 @@
+{
+    "Dataset": "ETTm1",
+    "Model_details": {
+        "Model": "CI_Transformer",
+        "Parameter Num": 15286368.0
+    },
+    "Exp_details": {
+        "Seq_len": 96,
+        "Pred_len": 96,
+        "n_vars": 7,
+        "subtract_last": "False",
+        "encoder_decoder": "False",
+        "Loss_Func": "MSELoss"
+    },
+    "Metrics": {
+        "Train Loss": 0.254,
+        "Val Loss": 0.501,
+        "MSE": 0.371,
+        "MAE": 0.389
+    }
+}

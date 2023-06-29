@@ -1,0 +1,21 @@
+{
+    "Dataset": "ETTh2",
+    "Model_details": {
+        "Model": "Transformer",
+        "Parameter Num": 10540039.0
+    },
+    "Exp_details": {
+        "Seq_len": 96,
+        "Pred_len": 96,
+        "n_vars": 7,
+        "subtract_last": "False",
+        "encoder_decoder": "False",
+        "Loss_Func": "MSELoss"
+    },
+    "Metrics": {
+        "Train Loss": 0.141,
+        "Val Loss": 1.263,
+        "MSE": 2.048,
+        "MAE": 1.162
+    }
+}

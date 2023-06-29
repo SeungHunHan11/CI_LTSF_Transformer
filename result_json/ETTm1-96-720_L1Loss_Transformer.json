@@ -1,0 +1,21 @@
+{
+    "Dataset": "ETTm1",
+    "Model_details": {
+        "Model": "Transformer",
+        "Parameter Num": 10540039.0
+    },
+    "Exp_details": {
+        "Seq_len": 96,
+        "Pred_len": 720,
+        "n_vars": 7,
+        "subtract_last": "False",
+        "encoder_decoder": "False",
+        "Loss_Func": "L1Loss"
+    },
+    "Metrics": {
+        "Train Loss": 0.233,
+        "Val Loss": 0.761,
+        "MSE": 1.078,
+        "MAE": 0.801
+    }
+}

@@ -1,0 +1,21 @@
+{
+    "Dataset": "ETTh2",
+    "Model_details": {
+        "Model": "CI_Transformer",
+        "Parameter Num": 27083088.0
+    },
+    "Exp_details": {
+        "Seq_len": 96,
+        "Pred_len": 336,
+        "n_vars": 7,
+        "subtract_last": "False",
+        "encoder_decoder": "False",
+        "Loss_Func": "MSELoss"
+    },
+    "Metrics": {
+        "Train Loss": 0.452,
+        "Val Loss": 0.448,
+        "MSE": 0.675,
+        "MAE": 0.566
+    }
+}

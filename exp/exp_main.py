@@ -32,12 +32,10 @@ class Exp_Main(Exp_Basic):
             'ns_Transformer': ns_Transformer,
             'CI_Transformer' : CI_Transformer,
             'CI_NS_Transformer': CI_NS_Transformer,
-
             'Informer': Informer,
             'ns_Informer': ns_Informer,
             'CI_Informer': CI_Informer,
             'CI_NS_Informer': CI_NS_Informer,
-
             'Autoformer': Autoformer,
             'ns_Autoformer': ns_Autoformer,
             'CI_Autoformer': CI_Autoformer,
@@ -218,6 +216,9 @@ class Exp_Main(Exp_Basic):
             vali_loss = self.vali(vali_data, vali_loader, criterion)
             test_loss = self.vali(test_data, test_loader, criterion)
 
+            self.train_loss = train_loss
+            self.vali_loss = vali_loss
+        
             print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f} Test Loss: {4:.7f}".format(
                 epoch + 1, train_steps, train_loss, vali_loss, test_loss))
             early_stopping(vali_loss, self.model, path)
@@ -317,7 +318,8 @@ class Exp_Main(Exp_Basic):
         f = open(self.args.result_name+".txt", 'a')
         f.write(setting + "  \n")
         f.write('mse:{}, mae:{}'.format(mse, mae))
-        f.write('count_parameters:{}'.format(count_parameters(self.model)))
+        f.write('Train_loss:{}, Vali_loss:{}'.format(self.train_loss, self.vali_loss))
+        f.write('_count_parameters:{}'.format(count_parameters(self.model)))
         f.write('\n')
         f.write('\n')
         f.close()
@@ -325,28 +327,32 @@ class Exp_Main(Exp_Basic):
         os.makedirs('./result_json', exist_ok=True)
 
         # Define the file path to save the JSON file
-        file_path = os.path.join('./result_json',self.args.model_id+'.json')
+        file_path = os.path.join('./result_json',self.args.model_id+'_'+str(self.criterion._get_name())+'_'+self.args.model+'.json')
 
         data_name = self.args.data_path.split('.')[0]
 
         # Define the experiment details
         experiment_details = {
-            "Dataset": data_name,
-            'Model_details':{
-                        "Model" : self.args.model,
-                        "Parameter Num" : float(count_parameters(self.model))
-                        },
-            "Exp_details":{
-                        "Seq_len" : self.args.seq_len,
-                        "Pred_len" : self.args.pred_len,
-                        "n_vars" : self.args.enc_in,
-                        "subtract_last" : str(self.args.subtract_last),
-                        "encoder_decoder" : str(self.args.encoder_decoder),
-                        "Loss_Func": str(self.criterion._get_name())
-                        },            
-            "MSE": round(float(mse),3),
-            "MAE": round(float(mae),3),
-        }
+                        "Dataset": data_name,
+                        'Model_details':{
+                                    "Model" : self.args.model,
+                                    "Parameter Num" : float(count_parameters(self.model))
+                                    },
+                        "Exp_details":{
+                                    "Seq_len" : self.args.seq_len,
+                                    "Pred_len" : self.args.pred_len,
+                                    "n_vars" : self.args.enc_in,
+                                    "subtract_last" : str(self.args.subtract_last),
+                                    "encoder_decoder" : str(self.args.encoder_decoder),
+                                    "Loss_Func": str(self.criterion._get_name())
+                                    },
+                        "Metrics":{
+                                    'Train Loss' : round(float(self.train_loss),3),
+                                    'Val Loss' : round(float(self.vali_loss),3),
+                                    "MSE": round(float(mse),3),
+                                    "MAE": round(float(mae),3),
+                                }
+                    }
 
         # Save the experiment details to a JSON file
         with open(file_path, "w") as json_file:

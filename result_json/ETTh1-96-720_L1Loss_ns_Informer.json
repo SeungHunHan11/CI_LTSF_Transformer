@@ -1,0 +1,21 @@
+{
+    "Dataset": "ETTh1",
+    "Model_details": {
+        "Model": "ns_Informer",
+        "Parameter Num": 11492679.0
+    },
+    "Exp_details": {
+        "Seq_len": 96,
+        "Pred_len": 720,
+        "n_vars": 7,
+        "subtract_last": "False",
+        "encoder_decoder": "False",
+        "Loss_Func": "L1Loss"
+    },
+    "Metrics": {
+        "Train Loss": 0.466,
+        "Val Loss": 1.018,
+        "MSE": 0.878,
+        "MAE": 0.678
+    }
+}
